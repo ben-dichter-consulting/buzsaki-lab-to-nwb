@@ -169,6 +169,7 @@ class YutaNWBConverter(NWBConverter):
         shank_channels = [[int(channel.text)
                           for channel in group.find('channels')]
                           for group in root.find('spikeDetection').find('channelGroups').findall('group')]
+
         all_shank_channels = np.concatenate(shank_channels)
         all_shank_channels.sort()
         nshanks = len(shank_channels)
