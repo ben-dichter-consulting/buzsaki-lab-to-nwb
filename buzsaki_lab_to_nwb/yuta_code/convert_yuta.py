@@ -6,8 +6,8 @@ import os
 import pandas as pd
 
 # List of folder paths to iterate over
-base_path = "D:/BuzsakiData/SenzaiY"
-paper_sessions = pd.read_excel(os.path.join(base_path, "DG_all_6_SessionShankList.xls"), header=None)[0]
+base_path = "/mnt/scrap/cbaker239/SenzaiY"
+paper_sessions = pd.read_excel(os.path.join(base_path, "DGProject/DG_all_6_SessionShankList.xls"), header=None)[0]
 sessions = dict()
 for paper_session in paper_sessions:
     mouse_id = paper_session[9:11]  # could be generalized better
@@ -23,7 +23,7 @@ paper_info = "DOI:10.1016/j.neuron.2016.12.011"
 for mouse_num, session_id in sessions.items():
     # TODO: replace with pathlib
     mouse_str = "YutaMouse" + str(mouse_num)
-    session = os.path.join(base_path, mouse_str, mouse_str+session_id)
+    session = os.path.join(base_path, mouse_str, mouse_str+str(session_id))
     session_name = os.path.split(session)[1]
     nwbfile_path = session + "_stub.nwb"
 
