@@ -128,12 +128,11 @@ class YutaNWBConverter(NWBConverter):
         # TODO: could be vastly improved with pathlib
         session_path = self.data_interface_objects['NeuroscopeSorting'].input_args['folder_path']
         subject_path, session_id = os.path.split(session_path)
-        fpath_base = os.path.split(subject_path)[0]
         # TODO: improve mouse_number extraction
         mouse_number = session_id[9:11]
         # TODO: add error checking on file existence
         subject_xls = os.path.join(subject_path, 'YM' + mouse_number + ' exp_sheet.xlsx')
-        hilus_csv_path = os.path.join(fpath_base, 'early_session_hilus_chans.csv')
+        hilus_csv_path = os.path.join(subject_path, 'early_session_hilus_chans.csv')
         if '-' in session_id:
             subject_id, date_text = session_id.split('-')
             b = False
@@ -219,7 +218,7 @@ class YutaNWBConverter(NWBConverter):
                                            'channel': channel,
                                            'description': 'environmental electrode recorded inline with neural data'})
 
-        df_unit_features = get_UnitFeatureCell_features(fpath_base, session_id, session_path, nshanks)
+        df_unit_features = get_UnitFeatureCell_features(subject_path, session_id, session_path, nshanks)
 
         # there are occasional mismatches between the matlab struct
         # and the neuroscope files regions: 3: 'CA3', 4: 'DG'

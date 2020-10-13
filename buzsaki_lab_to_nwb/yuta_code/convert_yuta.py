@@ -4,9 +4,11 @@ from buzsaki_lab_to_nwb import YutaNWBConverter
 # TODO: add pathlib
 import os
 import pandas as pd
+import warnings
 
 # List of folder paths to iterate over
-base_path = "/mnt/scrap/cbaker239/SenzaiY"
+base_path = "D:/BuzsakiData/SenzaiY"
+# base_path = "/mnt/scrap/cbaker239/SenzaiY"
 paper_sessions = pd.read_excel(os.path.join(base_path, "DGProject/DG_all_6_SessionShankList.xls"), header=None)[0]
 sessions = dict()
 for paper_session in paper_sessions:
@@ -24,43 +26,48 @@ for mouse_num, session_ids in sessions.items():
     for session_id in session_ids:
         # TODO: replace with pathlib
         mouse_str = "YutaMouse" + str(mouse_num)
-        session = os.path.join(base_path, mouse_str, mouse_str+str(session_id))
+        session = os.path.join(base_path, mouse_str+str(session_id))
         session_name = os.path.split(session)[1]
         nwbfile_path = session + "_stub.nwb"
 
         # In case this has to be run multiple times due to random errors, don't overwrite the nwbfile
-        if not os.path.isfile(nwbfile_path):
-            input_file_schema = YutaNWBConverter.get_input_schema()
+        if os.path.exists(session):
+            print(f"Processsing {session}...")
+            if not os.path.isfile(nwbfile_path):
+                input_file_schema = YutaNWBConverter.get_input_schema()
 
-            # construct input_args dict according to input schema
-            input_args = {
-                'NeuroscopeRecording': {'file_path': os.path.join(session, session_name) + ".dat"},
-                'NeuroscopeSorting': {'folder_path': session,
-                                      'keep_mua_units': False},
-                'YutaPosition': {'folder_path': session},
-                'YutaLFP': {'folder_path': session},
-                'YutaBehavior': {'folder_path': session}
-            }
+                # construct input_args dict according to input schema
+                input_args = {
+                    'NeuroscopeRecording': {'file_path': os.path.join(session, session_name) + ".dat"},
+                    'NeuroscopeSorting': {'folder_path': session,
+                                          'keep_mua_units': False},
+                    'YutaPosition': {'folder_path': session},
+                    'YutaLFP': {'folder_path': session},
+                    'YutaBehavior': {'folder_path': session}
+                }
 
-            yuta_converter = YutaNWBConverter(**input_args)
+                yuta_converter = YutaNWBConverter(**input_args)
 
-            expt_json_schema = yuta_converter.get_metadata_schema()
+                expt_json_schema = yuta_converter.get_metadata_schema()
 
-            # construct metadata_dict according to expt_json_schema
-            metadata = yuta_converter.get_metadata()
+                # construct metadata_dict according to expt_json_schema
+                metadata = yuta_converter.get_metadata()
 
-            # Yuta specific info
-            metadata['NWBFile'].update({'experimenter': experimenter})
-            metadata['NWBFile'].update({'session_description': paper_descr})
-            metadata['NWBFile'].update({'related_publications': paper_info})
+                # Yuta specific info
+                metadata['NWBFile'].update({'experimenter': experimenter})
+                metadata['NWBFile'].update({'session_description': paper_descr})
+                metadata['NWBFile'].update({'related_publications': paper_info})
 
-            metadata['Subject'].update({'species': "Mus musculus"})
-            #metadata['Subject'].update({'weight': '250-500g'})
+                metadata['Subject'].update({'species': "Mus musculus"})
+                #metadata['Subject'].update({'weight': '250-500g'})
 
-            metadata[yuta_converter.get_recording_type()]['Ecephys']['Device'][0].update({'name': 'implant'})
+                metadata[yuta_converter.get_recording_type()]['Ecephys']['Device'][0].update({'name': 'implant'})
 
-            for electrode_group_metadata in metadata[yuta_converter.get_recording_type()]['Ecephys']['ElectrodeGroup']:
-                electrode_group_metadata.update({'location': 'unknown'})
-                electrode_group_metadata.update({'device_name': 'implant'})
+                for electrode_group_metadata in \
+                        metadata[yuta_converter.get_recording_type()]['Ecephys']['ElectrodeGroup']:
+                    electrode_group_metadata.update({'location': 'unknown'})
+                    electrode_group_metadata.update({'device_name': 'implant'})
 
-            yuta_converter.run_conversion(nwbfile_path, metadata, stub_test=True)
+                yuta_converter.run_conversion(nwbfile_path, metadata, stub_test=True)
+        else:
+            print(f"The folder ({session}) does not exist!")

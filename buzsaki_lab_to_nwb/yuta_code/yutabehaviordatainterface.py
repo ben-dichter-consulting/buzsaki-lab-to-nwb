@@ -38,7 +38,6 @@ class YutaBehaviorInterface(BaseDataInterface):
         task_types = metadata_dict['task_types']
 
         subject_path, session_id = os.path.split(session_path)
-        fpath_base = os.path.split(subject_path)[0]
 
         [nwbfile.add_stimulus(x) for x in get_events(session_path)]
 
@@ -88,7 +87,7 @@ class YutaBehaviorInterface(BaseDataInterface):
         if os.path.isfile(trialdata_path):
             trials_data = loadmat(trialdata_path)['EightMazeRun']
 
-            trialdatainfo_path = os.path.join(fpath_base, 'EightMazeRunInfo.mat')
+            trialdatainfo_path = os.path.join(subject_path, 'EightMazeRunInfo.mat')
             trialdatainfo = [x[0] for x in loadmat(trialdatainfo_path)['EightMazeRunInfo'][0]]
 
             features = trialdatainfo[:7]
