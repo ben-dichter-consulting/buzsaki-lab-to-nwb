@@ -134,8 +134,8 @@ class YutaNWBConverter(NWBConverter):
         # TODO: improve mouse_number extraction
         mouse_number = session_id[9:11]
         # TODO: add error checking on file existence
-        subject_xls = os.path.join(subject_path, 'YM' + mouse_number + ' exp_sheet.xlsx')
-        hilus_csv_path = os.path.join(subject_path, 'early_session_hilus_chans.csv')
+        subject_xls = os.path.join(subject_path, "DGProject/YM" + mouse_number + " exp_sheet.xlsx")
+        hilus_csv_path = os.path.join(subject_path, "DGProject/early_session_hilus_chans.csv")
         if '-' in session_id:
             subject_id, date_text = session_id.split('-')
             b = False
@@ -178,12 +178,13 @@ class YutaNWBConverter(NWBConverter):
         spikes_nsamples = int(root.find('neuroscope').find('spikes').find('nSamples').text)
         lfp_sampling_rate = float(root.find('fieldPotentials').find('lfpSamplingRate').text)
 
-        lfp_channel = get_reference_elec(subject_xls,
-                                         hilus_csv_path,
-                                         session_start,
-                                         session_id,
-                                         b=b)
+        theta_reference = get_reference_elec(subject_xls,
+                                             hilus_csv_path,
+                                             session_start,
+                                             session_id,
+                                             b=b)
         shank_electrode_number = [x for _, channels in enumerate(shank_channels) for x, _ in enumerate(channels)]
+        shank_group_name = ["shank{}".format(n+1) for n, channels in enumerate(shank_channels) for _ in channels]
 
         celltype_dict = {
             0: 'unknown',
@@ -259,8 +260,7 @@ class YutaNWBConverter(NWBConverter):
                 'subject_id': subject_id,
                 'age': age,
                 'genotype': subject_data['genotype'],
-                # should be Mus musculus? also not specified in the experiment file except by the phrase 'mouseID'
-                'species': 'mouse'
+                'species': 'Mus musculus'
             },
             self.get_recording_type(): {
                 'Ecephys': {
@@ -274,14 +274,14 @@ class YutaNWBConverter(NWBConverter):
                     } for n, _ in enumerate(shank_channels)],
                     'Electrodes': [
                         {
-                            'name': 'theta_reference',
-                            'description': 'this electrode was used to calculate LFP canonical bands',
-                            'data':  list(all_shank_channels == lfp_channel)
-                        },
-                        {
                             'name': 'shank_electrode_number',
                             'description': '0-indexed channel within a shank',
                             'data': shank_electrode_number
+                        },
+                        {
+                            'name': 'group_name',
+                            'description': 'the name of the ElectrodeGroup this electrode is a part of',
+                            'data': shank_group_name
                         }
                     ],
                     'ElectricalSeries': {
@@ -319,19 +319,31 @@ class YutaNWBConverter(NWBConverter):
             },
             'YutaLFP': {
                 'all_shank_channels': all_shank_channels,
-                'special_electrodes': special_electrodes,
-                'lfp_channel': lfp_channel,
+                'lfp_channels': {},
                 'lfp_sampling_rate': lfp_sampling_rate,
                 'lfp': {'name': 'lfp',
                         'description': 'lfp signal for all shank electrodes'},
-                'lfp_decomposition': {'name': 'LFPDecompositionSeries',
-                                      'description': 'Theta and Gamma phase for reference LFP'},
+                'lfp_decomposition': {},
                 'spikes_nsamples': spikes_nsamples,
-                'shank_channels': shank_channels
+                'shank_channels': shank_channels,
+                'n_total_channels': n_total_channels
             },
             'YutaBehavior': {
                 'task_types': task_types
             }
         }
+
+        test_list = list(all_shank_channels == theta_reference)
+        if any(test_list):
+            metadata[self.get_recording_type()]['Ecephys']['Electrodes'].append({
+                'name': 'theta_reference',
+                'description': 'this electrode was used to calculate theta canonical bands',
+                'data':  test_list
+            })
+            metadata['YutaLFP']['lfp_channels'].update({'theta_reference': theta_reference})
+            metadata['YutaLFP']['lfp_decomposition'].update({
+                'theta_reference': {'name': 'ThetaDecompositionSeries',
+                                    'description': 'Theta and Gamma phase for theta-reference LFP'}
+            })
 
         return metadata

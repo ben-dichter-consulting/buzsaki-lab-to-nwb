@@ -13,7 +13,9 @@ base_path = "D:/BuzsakiData/SenzaiY"
 # base_path = "/mnt/scrap/cbaker239/SenzaiY"
 
 # Manual list of selected sessions that cause problems with the general functionality
-exlude_sessions = ["YutaMouse33-150218"]
+# Manually deleted .clu.xml and .clu.nrs from YutaMouse39-150730 data folder
+# Manaually deleted .clu_**** file from YutaaMouse33-150223
+exlude_sessions = ["YutaMouse33-150218"]  # missing .clu file relative to .res and .spk
 
 paper_sessions = pd.read_excel(os.path.join(base_path, "DGProject/DG_all_6_SessionShankList.xls"), header=None)[0]
 sessions = dict()
@@ -35,7 +37,7 @@ for mouse_num, session_ids in sessions.items():
         # TODO: replace with pathlib
         mouse_str = "YutaMouse" + str(mouse_num)
         session_strings.append(os.path.join(base_path, mouse_str+str(session_id)))
-        nwbfile_paths.append(session_strings[-1] + "_stub.nwb")
+        nwbfile_paths.append(session_strings[-1] + "_local_stub.nwb")
 
 
 def run_yuta_conv(session, nwbfile_path):
