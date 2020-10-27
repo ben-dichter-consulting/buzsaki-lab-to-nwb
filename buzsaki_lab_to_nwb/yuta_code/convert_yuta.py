@@ -42,52 +42,49 @@ for mouse_num, session_ids in sessions.items():
 
 def run_yuta_conv(session, nwbfile_path):
     """Conversion function to be run in parallel."""
-    try:
-        if os.path.exists(session):
-            print(f"Processsing {session}...")
-            if not os.path.isfile(nwbfile_path):
-                session_name = os.path.split(session)[1]
+    if os.path.exists(session):
+        print(f"Processsing {session}...")
+        if not os.path.isfile(nwbfile_path):
+            session_name = os.path.split(session)[1]
 
-                # construct input_args dict according to input schema
-                input_args = dict(
-                    source_data=dict(
-                        NeuroscopeRecording=dict(file_path=os.path.join(session, session_name) + ".dat"),
-                        NeuroscopeSorting=dict(
-                            folder_path=session,
-                            keep_mua_units=False,
-                            exclude_shanks=None
-                        ),
-                        YutaPosition=dict(folder_path=session),
-                        YutaLFP=dict(folder_path=session),
-                        YutaBehavior=dict(folder_path=session)
-                    )
+            # construct input_args dict according to input schema
+            input_args = dict(
+                source_data=dict(
+                    NeuroscopeRecording=dict(file_path=os.path.join(session, session_name) + ".dat"),
+                    NeuroscopeSorting=dict(
+                        folder_path=session,
+                        keep_mua_units=False,
+                        exclude_shanks=None
+                    ),
+                    YutaPosition=dict(folder_path=session),
+                    YutaLFP=dict(folder_path=session),
+                    YutaBehavior=dict(folder_path=session)
                 )
+            )
 
-                yuta_converter = YutaNWBConverter(**input_args)
+            yuta_converter = YutaNWBConverter(**input_args)
 
-                # construct metadata_dict according to expt_json_schema
-                metadata = yuta_converter.get_metadata()
+            # construct metadata_dict according to expt_json_schema
+            metadata = yuta_converter.get_metadata()
 
-                # Yuta specific info
-                metadata['NWBFile'].update({'experimenter': experimenter})
-                metadata['NWBFile'].update({'session_description': paper_descr})
-                metadata['NWBFile'].update({'related_publications': paper_info})
+            # Yuta specific info
+            metadata['NWBFile'].update({'experimenter': experimenter})
+            metadata['NWBFile'].update({'session_description': paper_descr})
+            metadata['NWBFile'].update({'related_publications': paper_info})
 
-                metadata['Subject'].update({'species': "Mus musculus"})
+            metadata['Subject'].update({'species': "Mus musculus"})
 
-                metadata[yuta_converter.get_recording_type()]['Ecephys']['Device'][0].update({'name': 'implant'})
+            metadata[yuta_converter.get_recording_type()]['Ecephys']['Device'][0].update({'name': 'implant'})
 
-                for electrode_group_metadata in \
-                        metadata[yuta_converter.get_recording_type()]['Ecephys']['ElectrodeGroup']:
-                    electrode_group_metadata.update({'location': 'unknown'})
-                    electrode_group_metadata.update({'device_name': 'implant'})
+            for electrode_group_metadata in \
+                    metadata[yuta_converter.get_recording_type()]['Ecephys']['ElectrodeGroup']:
+                electrode_group_metadata.update({'location': 'unknown'})
+                electrode_group_metadata.update({'device_name': 'implant'})
 
-                yuta_converter.run_conversion(nwbfile_path=nwbfile_path, metadata_dict=metadata,
-                                              stub_test=True, save_to_file=True)
-        else:
-            print(f"The folder ({session}) does not exist!")
-    except:
-        print(f"Session {session} encountered memory issues... skipping!")
+            yuta_converter.run_conversion(nwbfile_path=nwbfile_path, metadata_dict=metadata,
+                                          stub_test=True, save_to_file=True)
+    else:
+        print(f"The folder ({session}) does not exist!")
 
 
 Parallel(n_jobs=n_jobs)(delayed(run_yuta_conv)(session, nwbfile_path)
