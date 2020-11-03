@@ -152,15 +152,10 @@ class GrosmarkNWBConverter(NWBConverter):
                 ]
             ),
             GrosmarkLFP=dict(
-                all_shank_channels=all_shank_channels,
-                lfp_sampling_rate=lfp_sampling_rate,
                 lfp=dict(
                     name="lfp",
                     description="lfp signal for all shank electrodes"
                 ),
-                spikes_nsamples=spikes_nsamples,
-                shank_channels=shank_channels,
-                n_total_channels=n_total_channels
             ),
             GrosmarkBehavior=dict()
         )

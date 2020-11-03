@@ -36,8 +36,6 @@ class GrosmarkLFPInterface(BaseDataInterface):
         lfp_sampling_rate = float(root.find('fieldPotentials').find('lfpSamplingRate').text)
         spikes_nsamples = int(root.find('neuroscope').find('spikes').find('nSamples').text)
 
-        n_total_channels = metadata['n_total_channels']
-
         subject_path, session_id = os.path.split(session_path)
 
         _, all_channels_lfp_data = read_lfp(session_path, stub=stub_test, n_channels=n_total_channels)
