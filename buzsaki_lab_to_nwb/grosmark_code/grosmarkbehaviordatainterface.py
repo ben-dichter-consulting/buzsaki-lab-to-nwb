@@ -1,5 +1,4 @@
 """Authors: Cody Baker and Ben Dichter."""
-from nwb_conversion_tools.utils import get_base_schema
 from nwb_conversion_tools.basedatainterface import BaseDataInterface
 from pynwb import NWBFile
 from pynwb.file import TimeIntervals
@@ -13,20 +12,16 @@ from ..neuroscope import get_events, check_module
 
 
 class GrosmarkBehaviorInterface(BaseDataInterface):
+    """Primary data interface for behavioral aspects of the GrosmarkAD dataset."""
 
     @classmethod
     def get_input_schema(cls):
+        """Return subset of json schema for informing the NWBConverter of expepcted input arguments."""
         return dict(properties=dict(folder_path="string"))
-
-    def __init__(self, **input_args):
-        super().__init__(**input_args)
-
-    def get_metadata_schema(self):
-        metadata_schema = get_base_schema()
-        return metadata_schema
 
     def convert_data(self, nwbfile: NWBFile, metadata_dict: dict,
                      stub_test: bool = False, include_spike_waveforms: bool = False):
+        """Convert the behavioral portion of a particular session of the GrosmarkAD dataset."""
         session_path = self.input_args['folder_path']
         subject_path, session_id = os.path.split(session_path)
 
@@ -59,13 +54,15 @@ class GrosmarkBehaviorInterface(BaseDataInterface):
             conversion = 1.0
         else:
             conversion = np.nan
-        pos_data = [[float(x), float(y)] for x, y in zip(pos_mat['position']['position'][0][0]['x'][0][0],
-                                                         pos_mat['position']['position'][0][0]['y'][0][0])]
+        pos_data = [[x[0], y[0]] for x, y in zip(pos_mat['position']['position'][0][0]['x'][0][0],
+                                                 pos_mat['position']['position'][0][0]['y'][0][0])]
+        linearized_data = [[lin[0]] for lin in pos_mat['position']['position'][0][0]['lin'][0][0]]
 
         label = pos_mat['position']['behaviorinfo'][0][0]['MazeType'][0][0][0].replace(" ", "")
         pos_obj = Position(name=f"{label}Position")
         spatial_series_object = SpatialSeries(
-            name=label + f"{label}SpatialSeries",
+            name=f"{label}SpatialSeries",
+            description="(x,y) coordinates tracking subject movement through the maze.",
             data=H5DataIO(pos_data, compression='gzip'),
             reference_frame='unknown',
             conversion=conversion,
@@ -75,6 +72,21 @@ class GrosmarkBehaviorInterface(BaseDataInterface):
         )
         pos_obj.add_spatial_series(spatial_series_object)
         check_module(nwbfile, 'behavior', 'contains processed behavioral data').add_data_interface(pos_obj)
+
+        lin_pos_obj = Position(name=f"{label}LinearizedPosition")
+        lin_spatial_series_object = SpatialSeries(
+            name=f"{label}LinearizedTimeSeries",
+            description="Linearized position, defined as starting at the edge of reward area, "
+            "and increasing clockwise, terminating at the opposing edge of the reward area.",
+            data=H5DataIO(linearized_data, compression='gzip'),
+            reference_frame='unknown',
+            conversion=conversion,
+            starting_time=starting_time,
+            rate=rate,
+            resolution=np.nan
+        )
+        lin_pos_obj.add_spatial_series(lin_spatial_series_object)
+        check_module(nwbfile, 'behavior', 'contains processed behavioral data').add_data_interface(lin_pos_obj)
 
         # Epochs
         epoch_names = list(pos_mat['position']['Epochs'][0][0].dtype.names)

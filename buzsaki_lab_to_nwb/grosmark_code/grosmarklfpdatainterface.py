@@ -1,38 +1,22 @@
 """Authors: Cody Baker and Ben Dichter."""
-from nwb_conversion_tools.utils import get_base_schema, get_schema_from_hdmf_class
 from nwb_conversion_tools.basedatainterface import BaseDataInterface
-from pynwb import NWBFile, TimeSeries
-from pynwb.misc import DecompositionSeries
+from pynwb import NWBFile
 import os
-import numpy as np
 import warnings
 
-from ..band_analysis import filter_lfp, hilbert_lfp
-from ..neuroscope import read_lfp, write_lfp, write_spike_waveforms, check_module
+from ..neuroscope import read_lfp, write_lfp, write_spike_waveforms
 
 
 class GrosmarkLFPInterface(BaseDataInterface):
+    """Primary data interface for LFP aspects of the GrosmarkAD dataset."""
 
     @classmethod
     def get_input_schema(cls):
+        """Return subset of json schema for informing the NWBConverter of expepcted input arguments."""
         return dict(properties=dict(folder_path="string"))
 
-    def __init__(self, **input_args):
-        super().__init__(**input_args)
-
-    def get_metadata_schema(self):
-        metadata_schema = get_base_schema()
-
-        # ideally most of this be automatically determined from pynwb docvals
-        metadata_schema['properties']['TimeSeries'] = get_schema_from_hdmf_class(TimeSeries)
-        metadata_schema['properties']['DecompositionSeries'] = get_schema_from_hdmf_class(DecompositionSeries)
-        required_fields = ['TimeSeries', 'DecompositionSeries']
-        for field in required_fields:
-            metadata_schema['required'].append(field)
-
-        return metadata_schema
-
     def convert_data(self, nwbfile: NWBFile, metadata: dict, stub_test: bool = False):
+        """Convert the LFP portion of a particular session of the GrosmarkAD dataset."""
         session_path = self.input_args['folder_path']
         all_shank_channels = metadata['all_shank_channels']
         lfp_sampling_rate = metadata['lfp_sampling_rate']

@@ -12,6 +12,8 @@ from dateutil.parser import parse as dateparse
 
 
 class GrosmarkNWBConverter(NWBConverter):
+    """Primary conversion class for the GrosmarkAD dataset."""
+
     data_interface_classes = {'GrosmarkNoRecording': GrosmarkNoRecording,
                               'NeuroscopeSorting': neuroscopedatainterface.NeuroscopeSortingInterface,
                               'GrosmarkLFP': GrosmarkLFPInterface,
@@ -35,12 +37,11 @@ class GrosmarkNWBConverter(NWBConverter):
         super().__init__(**input_args)
 
     def get_recording_type(self):
+        """Auxilliary function for returning internal recording type."""
         return self._recording_type
 
-    def get_sorting_type(self):
-        return self._sorting_type
-
     def get_metadata(self):
+        """Auto-fill all relevant metadata used in run_conversion."""
         session_path = self.data_interface_objects['GrosmarkLFP'].input_args['folder_path']
         subject_path, session_id = os.path.split(session_path)
         if '_' in session_id:
@@ -102,21 +103,21 @@ class GrosmarkNWBConverter(NWBConverter):
                         for n, _ in enumerate(shank_channels)
                     ],
                     Electrodes=[
-                        {
-                            'name': 'shank_electrode_number',
-                            'description': '0-indexed channel within a shank',
-                            'data': shank_electrode_number
-                        },
-                        {
-                            'name': 'group',
-                            'description': 'a reference to the ElectrodeGroup this electrode is a part of',
-                            'data': shank_group_name
-                        },
-                        {
-                            'name': 'group_name',
-                            'description': 'the name of the ElectrodeGroup this electrode is a part of',
-                            'data': shank_group_name
-                        }
+                        dict(
+                            name='shank_electrode_number',
+                            description="0-indexed channel within a shank.",
+                            data=shank_electrode_number
+                        ),
+                        dict(
+                            name='group',
+                            description='A reference to the ElectrodeGroup this electrode is a part of.',
+                            data=shank_group_name
+                        ),
+                        dict(
+                            name='group_name',
+                            description='The name of the ElectrodeGroup this electrode is a part of.',
+                            data=shank_group_name
+                        )
                     ],
                 )
             ),
