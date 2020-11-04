@@ -6,7 +6,8 @@ import os
 base_path = Path("D:/BuzsakiData/GrosmarkAD")
 mice_names = ["Achilles", "Buddy", "Cicero", "Gatsby"]
 
-convert_sessions = [session for mouse_name in mice_names for session in (base_path / Path(mouse_name)).iterdir()]
+convert_sessions = [session for mouse_name in mice_names
+                    for session in (base_path / Path(mouse_name)).iterdir() if session.is_dir()]
 
 experimenter = "Andres Grosmark"
 paper_descr = "This data set is composed of eight bilateral silicon-probe multi-cellular electrophysiological "
