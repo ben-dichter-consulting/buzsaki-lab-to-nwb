@@ -3,7 +3,7 @@ from buzsaki_lab_to_nwb import GrosmarkNWBConverter
 from pathlib import Path
 import os
 
-base_path = Path("D:/BuzsakiData/GrosmarkAD")
+base_path = Path("/mnt/scrap/cbaker239/GrosmarkAD")
 mice_names = ["Achilles", "Buddy", "Cicero", "Gatsby"]
 
 convert_sessions = [session for mouse_name in mice_names
