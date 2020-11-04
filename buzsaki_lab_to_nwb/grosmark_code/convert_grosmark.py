@@ -41,7 +41,7 @@ bad_electrodes = dict(
     Achilles_10252013=[],
     Achilles_11012013=[],
     Cicero_09012014=[],
-    Cicero_091020114=[],
+    Cicero_09102014=[],
     Cicero_09172014=[]
 )
 
