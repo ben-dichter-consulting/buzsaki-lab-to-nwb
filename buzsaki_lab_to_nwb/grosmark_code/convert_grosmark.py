@@ -1,7 +1,6 @@
 """Authors: Cody Baker and Ben Dichter."""
 from buzsaki_lab_to_nwb import GrosmarkNWBConverter
 from pathlib import Path
-import os
 
 base_path = Path("/mnt/scrap/cbaker239/GrosmarkAD")
 mice_names = ["Achilles", "Buddy", "Cicero", "Gatsby"]
@@ -48,50 +47,51 @@ bad_electrodes = dict(
 for session_path in convert_sessions:
     folder_path = session_path.absolute()
     session_id = session_path.name
-    print(f"Converting session {session_id}...")
+    nwbfile_path = f"/mnt/scrap/cbaker239/GrosmarkAD/{session_id}_stub.nwb"
+    if not Path(nwbfile_path).is_file():
+        print(f"Converting session {session_id}...")
 
-    input_args = dict(
-        NeuroscopeSorting=dict(
-            folder_path=folder_path,
-            keep_mua_units=False
-        ),
-        GrosmarkLFP=dict(folder_path=folder_path),
-        GrosmarkBehavior=dict(folder_path=folder_path)
-    )
-
-    grosmark_converter = GrosmarkNWBConverter(**input_args)
-    metadata = grosmark_converter.get_metadata()
-
-    # Specific info
-    metadata['NWBFile'].update(
-        experimenter=experimenter,
-        session_description=paper_descr,
-        related_publications=paper_info
-    )
-
-    metadata['Subject'].update(
-        species="Rattus norvegicus domestica - Long Evans",
-        genotype="Wild type",
-        sex="male",
-        weight="250-350g"
-    )
-    # No age information reported in either publication, not available on dataset or site
-
-    f"see {session_id}.xml or {session_id}.sessionInfo.mat for more information"
-    metadata[grosmark_converter.get_recording_type()]['Ecephys']['Device'][0].update(description=device_descr)
-    metadata[grosmark_converter.get_recording_type()]['Ecephys']['Electrodes'].append(
-        dict(
-            name='bad_electrode',
-            description="Indicator for if the electrode was removed from analysis due to "
-            "low-amplitude or instabilities.",
-            data=[x in bad_electrodes[session_id]
-                  for x in range(len(metadata[grosmark_converter.get_recording_type()]['Ecephys']['subset_channels']))]
+        input_args = dict(
+            NeuroscopeSorting=dict(
+                folder_path=folder_path,
+                keep_mua_units=False
+            ),
+            GrosmarkLFP=dict(folder_path=folder_path),
+            GrosmarkBehavior=dict(folder_path=folder_path)
         )
-    )
-    metadata['GrosmarkLFP'].update(
-        bad_electrode=[x in bad_electrodes[session_id]
-                       for x in range(len(metadata['BuzsakiNoRecording']['Ecephys']['subset_channels']))]
-    )
 
-    nwbfile_path = os.path.join(folder_path, f"{session_id}_stub.nwb")
-    grosmark_converter.run_conversion(nwbfile_path=nwbfile_path, metadata_dict=metadata, stub_test=True)
+        grosmark_converter = GrosmarkNWBConverter(**input_args)
+        metadata = grosmark_converter.get_metadata()
+
+        # Specific info
+        metadata['NWBFile'].update(
+            experimenter=experimenter,
+            session_description=paper_descr,
+            related_publications=paper_info
+        )
+
+        metadata['Subject'].update(
+            species="Rattus norvegicus domestica - Long Evans",
+            genotype="Wild type",
+            sex="male",
+            weight="250-350g"
+        )
+        # No age information reported in either publication, not available on dataset or site
+
+        f"see {session_id}.xml or {session_id}.sessionInfo.mat for more information"
+        metadata[grosmark_converter.get_recording_type()]['Ecephys']['Device'][0].update(description=device_descr)
+        metadata[grosmark_converter.get_recording_type()]['Ecephys']['Electrodes'].append(
+            dict(
+                name='bad_electrode',
+                description="Indicator for if the electrode was removed from analysis due to "
+                "low-amplitude or instabilities.",
+                data=[x in bad_electrodes[session_id]
+                      for x in range(len(metadata['BuzsakiNoRecording']['Ecephys']['subset_channels']))]
+            )
+        )
+        metadata['GrosmarkLFP'].update(
+            bad_electrode=[x in bad_electrodes[session_id]
+                           for x in range(len(metadata['BuzsakiNoRecording']['Ecephys']['subset_channels']))]
+        )
+
+        grosmark_converter.run_conversion(nwbfile_path=nwbfile_path, metadata_dict=metadata, stub_test=True)
