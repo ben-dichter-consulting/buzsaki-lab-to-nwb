@@ -88,6 +88,10 @@ for session_path in convert_sessions:
                   for x in range(len(metadata[grosmark_converter.get_recording_type()]['Ecephys']['subset_channels']))]
         )
     )
+    metadata['GrosmarkLFP'].update(
+        bad_electrode=[x in bad_electrodes[session_id]
+                       for x in range(len(metadata['BuzsakiNoRecording']['Ecephys']['subset_channels']))]
+    )
 
     nwbfile_path = os.path.join(folder_path, f"{session_id}_stub.nwb")
     grosmark_converter.run_conversion(nwbfile_path=nwbfile_path, metadata_dict=metadata, stub_test=True)
