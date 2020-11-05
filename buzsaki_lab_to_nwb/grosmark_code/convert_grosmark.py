@@ -33,10 +33,11 @@ paper_info = ["Grosmark, A.D., and Buzsáki, G. (2016). "
 device_descr = "Silicon probe electrodes; all probes were implanted parallel to the "
 "septo-temporal axis of the dorsal hippocampus. First eight shanks pertain to CA1 left hemisphere, "
 "second eight pertain to CA1 right hemisphere."
+# These bad electrodes were added manually from the pdf attached to the dataset; they were adjusted here for zero-index
 bad_electrodes = dict(
-    Buddy_06272013=[24, 27, 58],
+    Buddy_06272013=[23, 26, 57],
     Gatsby_08022013=[],
-    Gatsby_08282013=[35, 45, 47],
+    Gatsby_08282013=[34, 44, 46],
     Achilles_10252013=[],
     Achilles_11012013=[],
     Cicero_09012014=[],
@@ -90,8 +91,7 @@ for session_path in convert_sessions:
             )
         )
         metadata['GrosmarkLFP'].update(
-            bad_electrode=[x in bad_electrodes[session_id]
-                           for x in range(len(metadata['BuzsakiNoRecording']['Ecephys']['subset_channels']))]
+            bad_electrode=bad_electrodes[session_id]
         )
 
         grosmark_converter.run_conversion(nwbfile_path=nwbfile_path, metadata_dict=metadata, stub_test=True)
