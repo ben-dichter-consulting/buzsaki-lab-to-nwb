@@ -631,8 +631,7 @@ def write_spike_waveforms_single_shank(nwbfile: NWBFile, session_path: str, shan
                                                                                        spikes_nsamples, nchan_on_shank)
         spk_times = read_spike_times(session_path, shankn)[:n_stub_spikes]
     else:
-        full_spks = np.fromfile(spk_file, dtype=np.int16,
-                                count=n_stub_spikes*spikes_nsamples*nchan_on_shank)
+        full_spks = np.fromfile(spk_file, dtype=np.int16)
         nchan_try = nchan_on_shank
         go = True
         while go:
