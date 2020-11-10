@@ -36,9 +36,9 @@ class GrosmarkLFPInterface(BaseDataInterface):
         spikes_nsamples = int(root.find('neuroscope').find('spikes').find('nSamples').text)
 
         # .spk files have removed the bad_electrodes
-        if 'bad_electrode' in metadata:
-            for shankn in shank_channels:
-                [shankn.remove(x) for x in metadata['bad_electrode'] if x in shankn]
+        # if 'bad_electrode' in metadata:
+        #     for shankn in shank_channels:
+        #         [shankn.remove(x) for x in metadata['bad_electrode'] if x in shankn]
 
         subject_path, session_id = os.path.split(session_path)
 
