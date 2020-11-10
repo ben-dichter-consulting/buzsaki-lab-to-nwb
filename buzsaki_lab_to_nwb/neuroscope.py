@@ -634,9 +634,9 @@ def write_spike_waveforms_single_shank(nwbfile: NWBFile, session_path: str, shan
         full_spks = np.fromfile(spk_file, dtype=np.int16)
         nchan_try = nchan_on_shank
         go = True
-        while go:
+        while go and nchan_try > 0:
             try:
-                spks = full_spks.reshape(-1, spikes_nsamples, nchan_on_shank)
+                spks = full_spks.reshape(-1, spikes_nsamples, nchan_try)
                 go = False
             except ValueError:
                 print(f"Improper size for waveforms on Shank{shankn}, subjecting one from {nchan_try}...")
