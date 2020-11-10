@@ -23,12 +23,14 @@ paper_descr = "This data set is composed of eight bilateral silicon-probe multi-
 "sessions were concatenated from the PRE, MAZE, and POST recording epochs. In addition to hippocampal "
 "electrophysiological recordings, neck EMG and head-mounted accelerometer signals were recorded, and the "
 "animal’s position during MAZE running epochs was tracked via head-mounted LEDs."
-paper_info = ["Grosmark, A.D., and Buzsáki, G. (2016). "
-              "Diversity in neural firing dynamics supports both rigid and learned hippocampal sequences. "
-              "Science 351, 1440–1443.",
-              "Chen, Z., Grosmark, A.D., Penagos, H., and Wilson, M.A. (2016). "
-              "Uncovering representations of sleep-associated hippocampal ensemble spike activity. "
-              "Sci. Rep. 6, 32193."]
+paper_info = [
+    "Grosmark, A.D., and Buzsáki, G. (2016). "
+    "Diversity in neural firing dynamics supports both rigid and learned hippocampal sequences. "
+    "Science 351, 1440–1443.",
+    "Chen, Z., Grosmark, A.D., Penagos, H., and Wilson, M.A. (2016). "
+    "Uncovering representations of sleep-associated hippocampal ensemble spike activity. "
+    "Sci. Rep. 6, 32193."
+]
 
 device_descr = "Silicon probe electrodes; all probes were implanted parallel to the "
 "septo-temporal axis of the dorsal hippocampus. First eight shanks pertain to CA1 left hemisphere, "

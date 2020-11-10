@@ -631,7 +631,18 @@ def write_spike_waveforms_single_shank(nwbfile: NWBFile, session_path: str, shan
                                                                                        spikes_nsamples, nchan_on_shank)
         spk_times = read_spike_times(session_path, shankn)[:n_stub_spikes]
     else:
-        spks = np.fromfile(spk_file, dtype=np.int16).reshape(-1, spikes_nsamples, nchan_on_shank)
+        full_spks = np.fromfile(spk_file, dtype=np.int16,
+                                count=n_stub_spikes*spikes_nsamples*nchan_on_shank)
+        nchan_try = nchan_on_shank
+        go = True
+        while go:
+            try:
+                spks = full_spks.reshape(-1, spikes_nsamples, nchan_on_shank)
+                go = False
+            except ValueError:
+                print(f"Improper size for waveforms on Shank{shankn}, subjecting one from {nchan_try}...")
+                nchan_try -= 1  # subject one 'bad' electrode
+
         spk_times = read_spike_times(session_path, shankn)
 
     if compression:
