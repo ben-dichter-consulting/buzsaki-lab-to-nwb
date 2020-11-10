@@ -35,11 +35,11 @@ paper_info = [
 device_descr = "Silicon probe electrodes; all probes were implanted parallel to the "
 "septo-temporal axis of the dorsal hippocampus. First eight shanks pertain to CA1 left hemisphere, "
 "second eight pertain to CA1 right hemisphere."
-# These bad electrodes were added manually from the pdf attached to the dataset; they were adjusted here for zero-index
+# These bad electrodes were added manually from the pdf attached to the dataset
 bad_electrodes = dict(
-    Buddy_06272013=[23, 26, 57],
+    Buddy_06272013=[24, 27, 58],
     Gatsby_08022013=[],
-    Gatsby_08282013=[34, 44, 46],
+    Gatsby_08282013=[33, 45, 47],
     Achilles_10252013=[],
     Achilles_11012013=[],
     Cicero_09012014=[],
@@ -50,7 +50,7 @@ bad_electrodes = dict(
 for session_path in convert_sessions:
     folder_path = session_path.absolute()
     session_id = session_path.name
-    nwbfile_path = f"/mnt/scrap/cbaker239/GrosmarkAD/{session_id}_stub.nwb"
+    nwbfile_path = f"/mnt/scrap/cbaker239/GrosmarkAD/{session_id}.nwb"
     if not Path(nwbfile_path).is_file():
         print(f"Converting session {session_id}...")
 
@@ -96,4 +96,4 @@ for session_path in convert_sessions:
             bad_electrode=bad_electrodes[session_id]
         )
 
-        grosmark_converter.run_conversion(nwbfile_path=nwbfile_path, metadata_dict=metadata, stub_test=True)
+        grosmark_converter.run_conversion(nwbfile_path=nwbfile_path, metadata_dict=metadata, stub_test=False)
