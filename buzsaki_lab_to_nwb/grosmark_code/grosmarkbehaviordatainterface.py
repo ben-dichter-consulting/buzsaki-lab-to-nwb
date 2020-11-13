@@ -51,7 +51,7 @@ class GrosmarkBehaviorInterface(BaseDataInterface):
         pos_filepath = Path(session_path) / f"{session_id}.position.behavior.mat"
         pos_mat = loadmat(str(pos_filepath.absolute()))
         starting_time = float(pos_mat['position']['timestamps'][0][0][0])  # confirmed to be a regularly sampled series
-        rate = float(pos_mat['position']['timestamps'][0][0][1]) - starting_time
+        rate = 1 / (float(pos_mat['position']['timestamps'][0][0][1]) - starting_time)
         if pos_mat['position']['units'][0][0][0] == 'm':
             conversion = 1.0
         else:

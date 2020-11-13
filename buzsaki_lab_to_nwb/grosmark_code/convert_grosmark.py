@@ -50,7 +50,7 @@ bad_electrodes = dict(
 for session_path in convert_sessions:
     folder_path = session_path.absolute()
     session_id = session_path.name
-    nwbfile_path = f"/mnt/scrap/cbaker239/GrosmarkAD/{session_id}.nwb"
+    nwbfile_path = base_path / f"{session_id}_stub.nwb"
     if not Path(nwbfile_path).is_file():
         print(f"Converting session {session_id}...")
 
@@ -82,18 +82,19 @@ for session_path in convert_sessions:
         # No age information reported in either publication, not available on dataset or site
 
         f"see {session_id}.xml or {session_id}.sessionInfo.mat for more information"
-        metadata[grosmark_converter.get_recording_type()]['Ecephys']['Device'][0].update(description=device_descr)
-        metadata[grosmark_converter.get_recording_type()]['Ecephys']['Electrodes'].append(
+        metadata['Ecephys']['Device'][0].update(description=device_descr)
+        metadata['Ecephys']['Electrodes'].append(
             dict(
                 name='bad_electrode',
                 description="Indicator for if the electrode was removed from analysis due to "
                 "low-amplitude or instabilities.",
                 data=[x in bad_electrodes[session_id]
-                      for x in range(len(metadata['BuzsakiNoRecording']['Ecephys']['subset_channels']))]
+                      for x in range(len(metadata['Ecephys']['subset_channels']))]
             )
         )
-        metadata['GrosmarkLFP'].update(
-            bad_electrode=bad_electrodes[session_id]
-        )
 
-        grosmark_converter.run_conversion(nwbfile_path=nwbfile_path, metadata_dict=metadata, stub_test=False)
+        grosmark_converter.run_conversion(
+            nwbfile_path=str(nwbfile_path.absolute()),
+            metadata_dict=metadata,
+            stub_test=True
+        )
