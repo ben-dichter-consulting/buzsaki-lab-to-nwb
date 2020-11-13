@@ -9,6 +9,7 @@ import os
 from lxml import etree as et
 from datetime import datetime
 from dateutil.parser import parse as dateparse
+import warnings
 
 
 class GrosmarkNWBConverter(NWBConverter):
@@ -110,37 +111,40 @@ class GrosmarkNWBConverter(NWBConverter):
                         data=shank_group_name
                     )
                 ],
-            ),
-            UnitProperties=[
-                dict(
-                    name="cell_type",
-                    description="name of cell type",
-                    data=celltype_info
-                ),
-                dict(
-                    name="global_id",
-                    description="global id for cell for entire experiment",
-                    data=[int(x) for x in cell_info['UID'][0][0][0]]
-                ),
-                dict(
-                    name="shank_id",
-                    description="0-indexed id of cluster from shank",
-                    # - 2 b/c the 0 and 1 IDs from each shank have been removed
-                    data=[int(x - 2) for x in cell_info['cluID'][0][0][0]]
-                ),
-                dict(
-                    name="electrode_group",
-                    description="the electrode group that each spike unit came from",
-                    data=["shank" + str(x) for x in cell_info['shankID'][0][0][0]]
-                ),
-                dict(
-                    name="region",
-                    description="brain region where unit was detected",
-                    data=[str(x[0]) for x in cell_info['region'][0][0][0]]
-                )
-            ],
-            GrosmarkLFP=dict(),
-            GrosmarkBehavior=dict()
+            )
         )
-
+        if len(self.data_interface_objects['NeuroscopeSorting'].sorting_extractor.get_unit_ids()) == len(celltype_info):
+            metadata.update(
+                UnitProperties=[
+                    dict(
+                        name="cell_type",
+                        description="name of cell type",
+                        data=celltype_info
+                    ),
+                    dict(
+                        name="global_id",
+                        description="global id for cell for entire experiment",
+                        data=[int(x) for x in cell_info['UID'][0][0][0]]
+                    ),
+                    dict(
+                        name="shank_id",
+                        description="0-indexed id of cluster from shank",
+                        # - 2 b/c the 0 and 1 IDs from each shank have been removed
+                        data=[int(x - 2) for x in cell_info['cluID'][0][0][0]]
+                    ),
+                    dict(
+                        name="electrode_group",
+                        description="the electrode group that each spike unit came from",
+                        data=[f"shank{n+1}" for n in cell_info['shankID'][0][0][0]]
+                    ),
+                    dict(
+                        name="region",
+                        description="brain region where unit was detected",
+                        data=[str(x[0]) for x in cell_info['region'][0][0][0]]
+                    )
+                ]
+            )
+        else:
+            warnings.warn("Dimension mismatch between NeuroscopeSorting and CellExplorer metainfo! "
+                          f"Skipping unit properties for session {session_id}.")
         return metadata
