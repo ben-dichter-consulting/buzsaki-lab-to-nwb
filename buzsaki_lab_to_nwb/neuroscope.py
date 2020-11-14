@@ -455,7 +455,7 @@ def write_lfp(nwbfile: NWBFile, data: ArrayLike, fs: float,
 
     lfp_electrical_series = ElectricalSeries(
         name=name, description=description,
-        data=data, electrodes=table_region, conversion=np.nan,
+        data=data, electrodes=table_region, conversion=1e-6,
         rate=fs, resolution=np.nan)
 
     ecephys_mod = check_module(
@@ -652,6 +652,7 @@ def write_spike_waveforms_single_shank(nwbfile: NWBFile, session_path: str, shan
     spike_event_series = SpikeEventSeries(name="SpikeWaveforms{}".format(shankn),
                                           data=data,
                                           timestamps=spk_times,
+                                          conversion=1e-6,
                                           electrodes=table_region)
 
     check_module(nwbfile, 'ecephys').add_data_interface(spike_event_series)
