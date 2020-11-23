@@ -1,5 +1,6 @@
 """Authors: Cody Baker and Ben Dichter."""
 from buzsaki_lab_to_nwb import PeyracheNWBConverter
+from nwb_conversion_tools import NeuroscopeRecording
 from pathlib import Path
 import os
 
@@ -37,7 +38,7 @@ device_descr = "Silicon probes (Neuronexus Inc. Ann Arbor, MI) were mounted on m
 "(200-μm shank separation) and each shank had 8 (4 or 8 shank probes; Buz32 or Buz64 Neuronexus) or 10 "
 "recording (6-shank probes; Buz64s) sites (160 μm2 each site; 1–3 M impedance), staggered to provide a "
 "two-dimensional arrangement (20 μm vertical separation)."
-raw_sessions = ["Mouse12-120806"]
+raw_sessions = []  # ["Mouse12-120806"]
 
 for session_path in convert_sessions:
     folder_path = session_path.absolute()
@@ -49,12 +50,12 @@ for session_path in convert_sessions:
             folder_path=folder_path,
             keep_mua_units=False
         ),
-        GrosmarkLFP=dict(folder_path=folder_path),
-        GrosmarkBehavior=dict(folder_path=folder_path)
+        PeyracheLFP=dict(folder_path=folder_path),
+        PeyracheBehavior=dict(folder_path=folder_path)
     )
     conversion_options = dict(
         NeuroscopeSorting=dict(stub_test=True),
-        GrosmarkLFP=dict(stub_test=True)
+        PeyracheLFP=dict(stub_test=True)
     )
 
     if session_path in raw_sessions:
@@ -81,10 +82,11 @@ for session_path in convert_sessions:
         related_publications=paper_info
     )
     metadata['Subject'].update(
-        species="Mus musculus",
         genotype="Wild type",
         weight="27-50g"
     )
+    if session_path not in raw_sessions:
+        metadata['Ecephys'].update(NeuroscopeRecording.get_metadata())
     metadata['Ecephys']['Device'][0].update(description=device_descr)
 
     nwbfile_path = os.path.join(folder_path, f"{session_id}_stub.nwb")
