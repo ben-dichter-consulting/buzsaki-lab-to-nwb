@@ -1,13 +1,11 @@
 """Authors: Cody Baker and Ben Dichter."""
 from buzsaki_lab_to_nwb import PeyracheNWBConverter
-from nwb_conversion_tools import NeuroscopeRecording
+from nwb_conversion_tools import neuroscopedatainterface as ns
 from pathlib import Path
 import os
 
-base_path = Path("D:/BuzsakiData/PeyracheA")
-mice_names = [f"Mouse{x}" for x in ["12", "16", "17", "18", "19", "20", "23", "24", "25", "27", "28", "32"]]
-
-convert_sessions = [session for mouse_name in mice_names for session in (base_path / Path(mouse_name)).iterdir()]
+base_path = Path("C:/Data/PeyracheA")
+convert_sessions = [session for mouse in base_path.iterdir() for session in mouse.iterdir()]
 
 experimenter = "Adrien Peyrache"
 paper_descr = "The data set contains recordings made from multiple anterior thalamic nuclei, mainly "
@@ -38,30 +36,33 @@ device_descr = "Silicon probes (Neuronexus Inc. Ann Arbor, MI) were mounted on m
 "(200-μm shank separation) and each shank had 8 (4 or 8 shank probes; Buz32 or Buz64 Neuronexus) or 10 "
 "recording (6-shank probes; Buz64s) sites (160 μm2 each site; 1–3 M impedance), staggered to provide a "
 "two-dimensional arrangement (20 μm vertical separation)."
-raw_sessions = []  # ["Mouse12-120806"]
 
 for session_path in convert_sessions:
-    folder_path = session_path.absolute()
+    folder_path = str(session_path.absolute())
     session_id = session_path.name
     print(f"Converting session {session_id}...")
+
+    eeg_file_path = str((session_path / f"{session_id}.eeg").absolute())
 
     input_args = dict(
         NeuroscopeSorting=dict(
             folder_path=folder_path,
             keep_mua_units=False
         ),
-        PeyracheLFP=dict(folder_path=folder_path),
+        NeuroscopeLFP=dict(file_path=eeg_file_path),
         PeyracheBehavior=dict(folder_path=folder_path)
     )
     conversion_options = dict(
         NeuroscopeSorting=dict(stub_test=True),
-        PeyracheLFP=dict(stub_test=True)
+        NeuroscopeLFP=dict(stub_test=True)
     )
 
-    if session_path in raw_sessions:
+    if (session_path / "raw").is_dir():
+        dat_file_path = str((session_path / "raw" / f"{session_id}-01.dat").absolute())
+
         input_args.update(
             NeuroscopeRecording=dict(
-                folder_path=folder_path
+                file_path=dat_file_path
             )
         )
         conversion_options.update(
@@ -85,8 +86,8 @@ for session_path in convert_sessions:
         genotype="Wild type",
         weight="27-50g"
     )
-    if session_path not in raw_sessions:
-        metadata['Ecephys'].update(NeuroscopeRecording.get_metadata())
+    if (session_path / "raw").is_dir():
+        metadata['Ecephys'].update(ns.NeuroscopeRecordingInterface.get_metadata())
     metadata['Ecephys']['Device'][0].update(description=device_descr)
 
     nwbfile_path = os.path.join(folder_path, f"{session_id}_stub.nwb")

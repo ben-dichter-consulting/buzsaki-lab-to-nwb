@@ -1,18 +1,17 @@
 """Authors: Cody Baker and Ben Dichter."""
 from nwb_conversion_tools import NWBConverter, neuroscopedatainterface
-from .peyrachelfpdatainterface import PeyracheLFPInterface
-from .peyrachebehaviordatainterface import PeyracheBehaviorInterface
+# from .peyrachebehaviordatainterface import PeyracheBehaviorInterface
 from pathlib import Path
 from dateutil.parser import parse as dateparse
 
 
-class GrosmarkNWBConverter(NWBConverter):
+class PeyracheNWBConverter(NWBConverter):
     """Primary conversion class for the GrosmarkAD dataset."""
 
     data_interface_classes = dict(
-        NeuroscopeRecording=neuroscopedatainterface.NeuroscopeMultiRecordingInterface,
+        NeuroscopeRecording=neuroscopedatainterface.NeuroscopeRecordingInterface,
         NeuroscopeSorting=neuroscopedatainterface.NeuroscopeSortingInterface,
-        PeyracheLFP=PeyracheLFPInterface,
+        NeuroscopeLFP=neuroscopedatainterface.NeuroscopeLFPInterface,
         # PeyracheBehavior=PeyracheBehaviorInterface
     )
 
