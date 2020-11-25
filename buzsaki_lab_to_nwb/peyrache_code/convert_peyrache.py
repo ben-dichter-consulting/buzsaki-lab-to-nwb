@@ -50,7 +50,7 @@ for session_path in convert_sessions:
             keep_mua_units=False
         ),
         NeuroscopeLFP=dict(file_path=eeg_file_path),
-        PeyracheBehavior=dict(folder_path=folder_path)
+        # PeyracheBehavior=dict(folder_path=folder_path)
     )
     conversion_options = dict(
         NeuroscopeSorting=dict(stub_test=True),
@@ -87,7 +87,8 @@ for session_path in convert_sessions:
         weight="27-50g"
     )
     if (session_path / "raw").is_dir():
-        metadata['Ecephys'].update(ns.NeuroscopeRecordingInterface.get_metadata())
+        xml_file_path = session_path / f"{session_id}.xml"
+        metadata['Ecephys'].update(ns.NeuroscopeRecordingInterface.get_ecephys_metadata(xml_file_path=xml_file_path))
     metadata['Ecephys']['Device'][0].update(description=device_descr)
 
     nwbfile_path = os.path.join(folder_path, f"{session_id}_stub.nwb")

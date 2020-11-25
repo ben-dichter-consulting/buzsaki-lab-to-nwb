@@ -17,7 +17,7 @@ class PeyracheNWBConverter(NWBConverter):
 
     def get_metadata(self):
         """Auto-fill all relevant metadata used in run_conversion."""
-        session_id = Path(self.data_interface_objects['NeuroscopeSorting'].input_args['folder_path']).stem
+        session_id = Path(self.data_interface_objects['NeuroscopeSorting'].source_data['folder_path']).stem
         if '-' in session_id:
             subject_id, date_text = session_id.split('-')
         session_start = dateparse(date_text[-4:] + date_text[:-4])
