@@ -87,7 +87,7 @@ for session_path in convert_sessions:
         weight="27-50g"
     )
     if (session_path / "raw").is_dir():
-        xml_file_path = session_path / f"{session_id}.xml"
+        xml_file_path = str((session_path / f"{session_id}.xml").absolute())
         metadata['Ecephys'].update(ns.NeuroscopeRecordingInterface.get_ecephys_metadata(xml_file_path=xml_file_path))
     metadata['Ecephys']['Device'][0].update(description=device_descr)
 
