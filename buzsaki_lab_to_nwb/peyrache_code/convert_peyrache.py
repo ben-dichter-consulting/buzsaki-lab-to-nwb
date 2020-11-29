@@ -4,7 +4,7 @@ from nwb_conversion_tools import neuroscopedatainterface as ns
 from pathlib import Path
 
 base_path = Path("D:/BuzsakiData/PeyracheA")
-convert_sessions = [session for mouse in base_path.iterdir() for session in mouse.iterdir()]
+convert_sessions = [session for mouse in base_path.iterdir() if mouse.is_dir() for session in mouse.iterdir()]
 
 experimenter = "Adrien Peyrache"
 paper_descr = "The data set contains recordings made from multiple anterior thalamic nuclei, mainly "
@@ -43,36 +43,37 @@ for session_path in convert_sessions:
 
     eeg_file_path = str((session_path / f"{session_id}.eeg").absolute())
     spikes_matfile_path = str((session_path / f"{session_id}.spikes.cellinfo.mat").absolute())
+    raw_data_folder_path = session_path / "raw"
 
-    input_args = dict(
-        CellExplorerSorting=dict(
-            spikes_matfile_path=spikes_matfile_path
-        ),
-        #NeuroscopeLFP=dict(file_path=eeg_file_path),
+    source_data = dict(
+        # CellExplorerSorting=dict(
+        #     spikes_matfile_path=spikes_matfile_path
+        # ),
+        # NeuroscopeLFP=dict(file_path=eeg_file_path),
         # PeyracheBehavior=dict(folder_path=folder_path)
     )
     conversion_options = dict(
-        CellExplorerSorting=dict(stub_test=True),
-        #NeuroscopeLFP=dict(stub_test=True)
+        # CellExplorerSorting=dict(stub_test=True),
+        # NeuroscopeLFP=dict(stub_test=True)
     )
 
-    # if (session_path / "raw").is_dir():
-    #     dat_file_path = str((session_path / "raw" / f"{session_id}-01.dat").absolute())
+    if raw_data_folder_path.is_dir():
+        folder_path = str(raw_data_folder_path.absolute())
 
-    #     input_args.update(
-    #         NeuroscopeRecording=dict(
-    #             file_path=dat_file_path
-    #         )
-    #     )
-    #     conversion_options.update(
-    #         NeuroscopeRecording=dict(
-    #             stub_test=True
-    #         )
-    #     )
+        source_data.update(
+            NeuroscopeRecording=dict(
+                folder_path=folder_path
+            )
+        )
+        conversion_options.update(
+            NeuroscopeRecording=dict(
+                stub_test=True
+            )
+        )
     # else:
     #     conversion_options['CellExplorerSorting'].update(write_ecephys_metadata=True)
 
-    peyrache_converter = PeyracheNWBConverter(**input_args)
+    peyrache_converter = PeyracheNWBConverter(**source_data)
     metadata = peyrache_converter.get_metadata()
 
     # Specific info
@@ -85,10 +86,10 @@ for session_path in convert_sessions:
         genotype="Wild type",
         weight="27-50g"
     )
-    # if (session_path / "raw").is_dir():
+    # if not raw_data_folder_path.is_dir():
     #     xml_file_path = str((session_path / f"{session_id}.xml").absolute())
     #     metadata['Ecephys'].update(ns.NeuroscopeRecordingInterface.get_ecephys_metadata(xml_file_path=xml_file_path))
-    # metadata['Ecephys']['Device'][0].update(description=device_descr)
+    metadata['Ecephys']['Device'][0].update(description=device_descr)
 
     nwbfile_path = str((base_path / f"{session_id}_stub.nwb").absolute())
     peyrache_converter.run_conversion(
