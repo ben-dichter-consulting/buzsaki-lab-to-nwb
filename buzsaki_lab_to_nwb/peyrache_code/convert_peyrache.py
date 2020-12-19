@@ -40,12 +40,12 @@ stub_test = True
 conversion_factor = 0.3815  # Ampliplex
 
 for session_path in convert_sessions:
-    folder_path = str(session_path.absolute())
+    folder_path = str(session_path)
     session_id = session_path.name
     print(f"Converting session {session_id}...")
 
-    eeg_file_path = str((session_path / f"{session_id}.eeg").absolute())
-    spikes_matfile_path = str((session_path / f"{session_id}.spikes.cellinfo.mat").absolute())
+    eeg_file_path = str((session_path / f"{session_id}.eeg"))
+    spikes_matfile_path = str((session_path / f"{session_id}.spikes.cellinfo.mat"))
     raw_data_folder_path = session_path / "raw"
 
     source_data = dict(
@@ -83,7 +83,7 @@ for session_path in convert_sessions:
     )
     metadata['Ecephys']['Device'][0].update(description=device_descr)
 
-    nwbfile_path = str((base_path / f"{session_id}_stub.nwb").absolute())
+    nwbfile_path = str((base_path / f"{session_id}_stub.nwb"))
     peyrache_converter.run_conversion(
         nwbfile_path=nwbfile_path,
         metadata=metadata,
