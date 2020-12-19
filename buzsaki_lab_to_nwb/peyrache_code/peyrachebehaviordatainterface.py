@@ -1,29 +1,28 @@
 """Authors: Cody Baker and Ben Dichter."""
-from nwb_conversion_tools.basedatainterface import BaseDataInterface
-from pynwb import NWBFile
-from pynwb.file import TimeIntervals
-from pynwb.behavior import SpatialSeries, Position
-from hdmf.backends.hdf5.h5_utils import H5DataIO
 import os
 import numpy as np
 from pathlib import Path
 from scipy.io import loadmat
 import warnings
 
+from nwb_conversion_tools.basedatainterface import BaseDataInterface
+from pynwb import NWBFile
+from pynwb.file import TimeIntervals
+from pynwb.behavior import SpatialSeries, Position
+from hdmf.backends.hdf5.h5_utils import H5DataIO
+
 from ..neuroscope import get_events, check_module
 
 
-class PeyracheBehaviorInterface(BaseDataInterface):
-    """Primary data interface for behavioral aspects of the GrosmarkAD dataset."""
+class PeyracheMiscInterface(BaseDataInterface):
+    """Primary data interface for miscellaneous aspects of the PeyracheA dataset."""
 
     @classmethod
     def get_input_schema(cls):
-        """Return subset of json schema for informing the NWBConverter of expepcted input arguments."""
         return dict(properties=dict(folder_path="string"))
 
     def convert_data(self, nwbfile: NWBFile, metadata_dict: dict,
                      stub_test: bool = False, include_spike_waveforms: bool = False):
-        """Convert the behavioral portion of a particular session of the GrosmarkAD dataset."""
         session_path = self.input_args['folder_path']
         subject_path, session_id = os.path.split(session_path)
 
@@ -32,7 +31,7 @@ class PeyracheBehaviorInterface(BaseDataInterface):
 
         # States
         sleep_state_fpath = os.path.join(session_path, "{session_id}.SleepState.states.mat")
-        # label renaming specific to Watson
+        # label renaming specific to Peyrache
         state_label_names = dict(WAKEstate="Awake", NREMstate="Non-REM", REMstate="REM")
         if os.path.isfile(sleep_state_fpath):
             matin = loadmat(sleep_state_fpath)['SleepState']['ints'][0][0]
